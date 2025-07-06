@@ -1,42 +1,41 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quizzes</title>
+    <title>Quiz List</title>
+    <script src="https://unpkg.com/htmx.org@1.9.5"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body class="bg-light">
-<div class="container py-5">
-    <div class="d-flex justify-content-between mb-4">
-        {% if user.is_authenticated %}
-            <div>
-                <h4>Welcome, {{ user.username }}!</h4>
-                <a href="{% url 'create_quiz' %}" class="btn btn-success mb-3">+ Create New Quiz</a>
-                <form method="post" action="{% url 'logout' %}" class="d-inline">
-                    {% csrf_token %}
-                    <button type="submit" class="btn btn-danger btn-sm">Logout</button>
-                </form>
-            </div>
-        {% else %}
-            <div>
-                <a href="{% url 'login' %}" class="btn btn-primary">Login</a>
-                <a href="{% url 'register' %}" class="btn btn-success">Register</a>
-            </div>
-        {% endif %}
-    </div>
 
-    <h1 class="mb-4">Available Quizzes</h1>
-    <div class="list-group">
+<div class="container py-5">
+    <h2 class="mb-4">Quizzes</h2>
+
+    <!-- Create Quiz Button -->
+    <button class="btn btn-primary mb-3" hx-get="/quiz/create/" hx-target="#quiz-form" hx-swap="innerHTML">
+        Create Quiz
+    </button>
+
+    <!-- Quiz Form (Loaded dynamically) -->
+    <div id="quiz-form"></div>
+
+    <!-- List of Quizzes -->
+    <div id="quiz-list">
         {% for quiz in quizzes %}
-            <a href="{% url 'quiz_detail' quiz.id %}" class="list-group-item list-group-item-action">
-                {{ quiz.title }}
-            <a href="{% url 'update_quiz' quiz.id %}" class="btn btn-warning btn-sm">Update</a>
-            <a href="{% url 'delete_quiz' quiz.id %}" class="btn btn-danger btn-sm">Delete</a>
-            </a>
-        {% empty %}
-            <p>No quizzes available.</p>
+            <div class="quiz-item">
+                <!-- ✅ UPDATED: Clicking a quiz title loads details dynamically -->
+                <a hx-get="/quiz/{{ quiz.id }}/" hx-target="#quiz-content" hx-swap="innerHTML">
+                    {{ quiz.title }}
+                </a>
+            </div>
         {% endfor %}
     </div>
+
+    <!-- ✅ NEW: This is where quiz details will be loaded dynamically -->
+    <div id="quiz-content"></div>
+
 </div>
+
 </body>
 </html>

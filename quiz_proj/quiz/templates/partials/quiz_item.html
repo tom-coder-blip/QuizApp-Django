@@ -1,0 +1,6 @@
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<div class="quiz-item">
+    <a hx-get="/quiz/{{ quiz.id }}/" hx-target="#quiz-content" hx-swap="innerHTML">
+        {{ quiz.title }}
+    </a>
+</div>

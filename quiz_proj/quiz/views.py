@@ -9,23 +9,22 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 def quiz_list(request):
     quizzes = Quiz.objects.all()
+
+    #If the request is from HTMX, return only a partial HTML response.
+    if request.headers.get("HX-Request"):
+        return render(request, 'quiz/partials/quiz_list_partial.html', {'quizzes': quizzes})
+    
     return render(request, 'quiz/quiz_list.html', {'quizzes': quizzes})
 
 def quiz_detail(request, quiz_id):
     quiz = get_object_or_404(Quiz, id=quiz_id)
-    questions = Question.objects.filter(quiz=quiz)
 
-    if request.method == "POST":
-        score = 0
-        total_questions = questions.count()
-        for question in questions:
-            selected_option = request.POST.get(f'question_{question.id}')
-            if selected_option and int(selected_option) == question.correct_option:
-                score += 1
-        
-        return render(request, 'quiz/quiz_result.html', {'quiz': quiz, 'score': score, 'total': total_questions})
-
-    return render(request, 'quiz/quiz_detail.html', {'quiz': quiz, 'questions': questions})
+    # Check if the request is from HTMX
+    if request.headers.get("HX-Request"):
+        return render(request, 'quiz/partials/quiz_detail_partial.html', {'quiz': quiz})
+    
+    # If it's a normal request, return the full page
+    return render(request, 'quiz/quiz_detail.html', {'quiz': quiz})
 
 def register(request):   #come back to it
     if request.method == 'POST':
@@ -42,10 +41,14 @@ def create_quiz(request):
     if request.method == 'POST':
         form = QuizForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('quiz_list')
+            quiz = form.save()
+            return render(request, 'quiz/partials/quiz_item.html', {'quiz': quiz})  #Return only new quiz item
     else:
         form = QuizForm()
+
+    if request.headers.get("HX-Request"):
+        return render(request, 'quiz/partials/quiz_form.html', {'form': form})  # Return only form if HTMX
+    
     return render(request, 'quiz/create_quiz.html', {'form': form})
 
 def add_question(request, quiz_id):

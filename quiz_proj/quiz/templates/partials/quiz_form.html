@@ -1,0 +1,6 @@
+<script src="https://unpkg.com/htmx.org@1.9.12"></script>
+<form method="POST" hx-post="/quiz/create/" hx-target="#quiz-list" hx-swap="beforeend">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Create</button>
+</form>
